@@ -1,0 +1,42 @@
+ - supposons qu'on a un utilisateur qui contient des données , puis par erreur on a supprimé ce dernier avec son schéma , on peut récupérer notre base de données correspond a l'état ou on a l'utilisateur user1 avant les modification non souhaitées(la suppression de user1).
+ => c'est le role de flashback database.
+
+ -voici l'ensemble des commandes pour effectuer l'opération:
+
+1- set oracle_sid=DBA2
+=> pour se connecter a notre base de données 'DBA2'.
+
+2- sqlplus / as sysdba
+=> se connecter en tant que sysdba pour monter et arreter la base de donnees ..
+
+3- select log_mode,flashbach_on from v$database;
+=> avant d'effectuer l'opération de flashback il faut vérifier que le mode archivelog et flashback_on est activé.
+
+4- select sysdate from dual;
+=> pour afficher la date avant des modifications non souhaitées sur la base, la commande va afficher seulement le jour , le mois et l'année.
+ 
+5- alter session set nls_date_format ='dd/mm/yyyy hh24:mi:ss';
+=> il faut formater l'affichage pour qu'on peut voir aussi l'heure actuelle.
+
+6- select sysdate from dual;
+=> afficher la date sous format 'a/m/j h:m:s'.
+
+7- drop user user1 cascade;
+=> maintenant on peut supprimer l'utilisateur user1 qui contient une table avec des données.
+
+8- shutdown abort;
+=> arreter la base en annulant toutes les modifications des utilisateurs .
+
+9- startup mount 
+=> demarrer la base a l'état mount (on est besoin de fichier de controle qui est accessible a l'état mount parce que les informations de flashback est dans ce fichier).
+
+10- flashback database to timestamp to_timestamp(' ', 'dd/mm/yyyy hh24:mi:ss') ;
+=> rétablit notre base de données jusqu'a un point antérieur dans le temps (la date afficher par la commande 6).
+
+11- alter database open resetlogs;
+=> ouvrir la base en mode resetlogs pour autoriser les mises a jour dans les fichiers journaux.
+
+===> maintenant on peut vérifier l'éxistance de user1 et son schéma.
+
+
+
